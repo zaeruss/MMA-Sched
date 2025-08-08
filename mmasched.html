@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Multimedia Arts 1st Semester</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f9;
+      padding: 20px;
+      color: #333;
+      max-width: 900px;
+      margin: auto;
+      position: relative;
+      min-height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 25px;
+      color: #222;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+    }
+
+    /* Day buttons */
+    .day-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 35px;
+      flex-wrap: wrap;
+    }
+    .day-btn {
+      background-color: #ddd;
+      border: none;
+      padding: 12px 22px;
+      font-weight: 700;
+      font-size: 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #333;
+      transition: background-color 0.3s ease;
+      min-width: 90px;
+      text-align: center;
+    }
+    .day-btn:hover {
+      background-color: #bbb;
+    }
+    .day-btn.active {
+      background-color: #222;
+      color: white;
+    }
+
+    /* Schedule container */
+    .schedule-day {
+      display: none;
+      background-color: white;
+      padding: 24px 30px;
+      border-radius: 10px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+      margin-bottom: 45px;
+    }
+    .schedule-day.active {
+      display: block;
+    }
+
+    /* Schedule blocks */
+    .block {
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      color: #111;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease;
+      position: relative;
+    }
+    .block:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    .math {background-color: #e6f0ff;}
+    .pe {background-color: #e9f7ef;}
+    .socsci {background-color: #fff8e1;}
+    .arts {background-color: #f3e9ff;}
+    .ethics {background-color: #e0f8fa;}
+    .nstp {background-color: #fdecea;}
+    .vacant {background-color: #e1f5fe; color: #0277bd; font-weight: 700;}
+
+    /* Subject and Section */
+    .subject-section {
+      font-size: 20px;
+      color: #222;
+      margin-bottom: 10px;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Time styling */
+    .time {
+      font-size: 16px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    /* Room and Instructor styling */
+    .info-row {
+      font-size: 15px;
+      font-weight: 500;
+      color: #444;
+      margin-bottom: 4px;
+    }
+
+    .label {
+      font-weight: 700;
+      color: #555;
+      margin-right: 8px;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      justify-content: center;
+      margin-top: 35px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #333;
+    }
+    .legend-color {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+    }
+
+    /* Floating notes button */
+    #notes-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      background-color: #222;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      transition: background-color 0.3s ease;
+    }
+    #notes-btn:hover {
+      background-color: #555;
+    }
+
+    /* Note icon in subject */
+    .note-icon {
+      font-size: 18px;
+      color: #f39c12;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease;
+    }
+    .note-icon:hover {
+      transform: scale(1.2);
+    }
+
+    /* Modal overlay */
+    #notes-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    #notes-modal.active {
+      display: flex;
+    }
+
+    /* Modal content */
+    .modal-content {
+      background: white;
+      width: 100%;
+      max-width: 700px;
+      max-height: 90vh;
+      border-radius: 12px;
+      padding: 25px 30px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-y: auto;
+    }
+
+    /* Modal header */
+    .modal-header {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #222;
+    }
+
+    /* Close button */
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 28px;
+      font-weight: 700;
+      color: #777;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    .modal-close:hover {
+      color: #222;
+    }
+
+    /* Form elements */
+    label {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 6px;
+      display: block;
+      color: #333;
+    }
+    select, textarea {
+      width: 100%;
+      font-size: 15px;
+      padding: 10px 12px;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      border: 1.5px solid #ccc;
+      resize: vertical;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: border-color 0.3s ease;
+    }
+    select:focus, textarea:focus {
+      border-color: #222;
+      outline: none;
+    }
+    textarea {
+      min-height: 140px;
+    }
+
+    /* Save button */
+    .btn-save {
+      align-self: center;
+      background-color: #222;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: auto;
+      max-width: 200px;
+    }
+    .btn-save:hover {
+      background-color: #444;
+    }
+
+    /* Responsive for small devices */
+    @media (max-width: 480px) {
+      .modal-content {
+        padding: 18px 20px;
+      }
+      h1 {
+        font-size: 26px;
+      }
+      .day-btn {
+        font-size: 16px;
+        padding: 10px 18px;
+      }
+      .subject-section {
+        font-size: 18px;
+      }
+      .time {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <button id="notes-btn" title="Open Notes">📝</button>
+
+  <h1>Multimedia Arts 1st Semester</h1>
+
+  <div class="day-buttons">
+    <button class="day-btn active" data-day="monday">Monday</button>
+    <button class="day-btn" data-day="tuesday">Tuesday</button>
+    <button class="day-btn" data-day="wednesday">Wednesday</button>
+    <button class="day-btn" data-day="friday">Friday</button>
+    <button class="day-btn" data-day="saturday">Saturday</button>
+  </div>
+
+  <!-- Schedule Days -->
+
+  <!-- Monday -->
+  <div class="schedule-day active" id="monday">
+    <div class="block math" data-subject="Mathematics in the Modern World" data-day="monday">
+      <div class="subject-section">
+        Mathematics in the Modern World (MATH01G) - BSN101
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+      </div>
+      <div class="time">09:00 AM – 10:30 AM</div>
+      <div class="info-row"><span class="label">Room:</span>J320</div>
+      <div class="info-row"><span class="label">Instructor:</span>TBD</div>
+    </div>
+    <div class="block socsci" data-subject="Understanding the Self" data-day="monday">
+      <div class="subject-section">
+        Understanding the Self (UTSN01G) - BSN101
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+      </div>
+      <div class="time">10:30 AM – 12:00 PM</div>
+      <div class="info-row"><span class="label">Room:</span>J320</div>
+      <div class="info-row"><span class="label">Instructor:</span>TBD</div>
+    </div>
+    <div class="block vacant">
+      <div class="subject-section">Vacant Time</div>
+      <div class="time">12:00 PM – 01:00 PM</div>
+    </div>
+    <div class="block pe" data-subject="Physical Activities Toward Health and Fitness 1" data-day="monday">
+      <div class="subject-section">
+        Physical Activities Toward Health and Fitness 1 (PATHFit1) - MMA105
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+      </div>
+      <div class="time">01:00 PM – 03:00 PM</div>
+      <div class="info-row"><span class="label">Room:</span>SRDB1</div>
+      <div class="info-row"><span class="label">Instructor:</span>TBD</div>
+    </div>
+  </div>
+
+  <!-- Tuesday -->
+  <div class="schedule-day" id="tuesday">
+    <div class="block arts" data-subject="History of Graphic Design" data-day="tuesday">
+      <div class="subject-section">
+        History of Graphic Design (MAHSGRP) - MMA105
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+      </div>
+      <div class="time">08:30 AM – 11:30 AM</div>
+      <div class="info-row"><span class="label">Room:</span>C710</div>
+      <div class="info-row"><span class="label">Instructor:</span>TBD</div>
+    </div>
+    <div class="block vacant">
+      <div class="subject-section">Vacant Time</div>
+      <div class="time">11:30 AM – 02:00 PM</div>
+    </div>
+    <div class="block arts" data-subject="Introduction to Multimedia Arts" data-day="tuesday">
+      <div class="subject-section">
+        Introduction to Multimedia Arts (MAINTRO) - MMA105
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+      </div>
+      <div class="time">02:00 PM – 05:00 PM</div>
+      <div class="info-row"><span class="label">Room:</span>C303</div>
+      <div class="info-row"><span class="label">Instructor:</span>TBD</div>
+    </div>
+  </div>
+
+  <!-- Wednesday -->
+  <div class="schedule-day" id="wednesday">
+    <div class="block math" data-subject="Mathematics in the Modern World" data-day="wednesday">
+      <div class="subject-section">
+        Mathematics in the Modern World (MATH01G) - BSN101
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+      </div>
+      <div class="time">09:00 AM – 10:30 AM</div>
+      <div class="info-row"><span class="label">Room:</span>TBD</div>
+      <div class="info-row"><span class="label">Instructor:</span>TBD</div>
+    </div>
+    <div class="block socsci" data-subject="Understanding the Self" data-day="wednesday">
+      <div class="subject-section">
+        Understanding the Self (UTSN01G) - BSN101
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+      </div>
+      <div class="time">10:30 AM – 12:00 PM</div>
+      <div class="info-row"><span class="label">Room:</span>J320</div>
+      <div class="info-row"><span class="label">Instructor:</span>TBD</div>
+    </div>
+    <div class="block vacant">
+      <div class="subject-section">Vacant Time</div>
+      <div class="time">12:00 PM – 01:00 PM</div>
+    </div>
+    <div class="block arts" data-subject="Drawing 1: Basic Form and Shape (Part 1)" data-day="wednesday">
+      <div class="subject-section">
+        Drawing 1: Basic Form and Shape (MADRWG1) - MMA105 (Part 1)
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+      </div>
+      <div class="time">01:00 PM – 02:00 PM</div>
+      <div class="info-row"><span class="label">Room:</span>C303</div>
+      <div class="info-row"><span class="label">Instructor:</span>TBD</div>
+    </div>
+    <div class="block vacant">
+      <div class="subject-section">Vacant Time</div>
+      <div class="time">02:00 PM – 02:30 PM</div>
+    </div>
+    <div class="block arts" data-subject="Drawing 1: Basic Form and Shape (Part 2)" data-day="wednesday">
+      <div class="subject-section">
+        Drawing 1: Basic Form and Shape (MADRWG1) - MMA105 (Part 2)
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+      </div>
+      <div class="time">02:30 PM – 05:30 PM</div>
+      <div class="info-row"><span class="label">Room:</span>C308</div>
+      <div class="info-row"><span class="label">Instructor:</span>TBD</div>
+    </div>
+  </div>
+
+  <!-- Friday -->
+  <div class="schedule-day" id="friday">
+    <div class="block ethics" data-subject="Ethics" data-day="friday">
+      <div class="subject-section">
+        Ethics (ETHN01G) - MMA104
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+      </div>
+      <div class="time">11:30 AM – 01:00 PM</div>
+      <div class="info-row"><span class="label">Room:</span>MMA104</div>
+      <div class="info-row"><span class="label">Instructor:</span>TBD</div>
+    </div>
+  </div>
+
+  <!-- Saturday -->
+  <div class="schedule-day" id="saturday">
+    <div class="block ethics" data-subject="Ethics" data-day="saturday">
+      <div class="subject-section">
+        Ethics (ETHN01G) - MMA104
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+      </div>
+      <div class="note-tooltip"></div>
+      <div class="time">11:30 AM – 01:00 PM</div>
+      <div class="info-row"><span class="label">Room:</span>MMA104</div>
+      <div class="info-row"><span class="label">Instructor:</span>TBD</div>
+    </div>
+
+    <div class="block nstp" data-subject="NSTP 1" data-day="saturday">
+      <div class="subject-section">
+        NSTP 1 - MMA105
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+      </div>
+      <div class="time">12:00 PM – 05:00 PM</div>
+      <div class="info-row"><span class="label">Room:</span>MMA105</div>
+      <div class="info-row"><span class="label">Instructor:</span>TBD</div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-color math"></div>Mathematics in the Modern World</div>
+    <div class="legend-item"><div class="legend-color pe"></div>Physical Activities Toward Health and Fitness 1</div>
+    <div class="legend-item"><div class="legend-color socsci"></div>Understanding the Self</div>
+    <div class="legend-item"><div class="legend-color arts"></div>Drawing, History, Multimedia Arts</div>
+    <div class="legend-item"><div class="legend-color ethics"></div>Ethics</div>
+    <div class="legend-item"><div class="legend-color nstp"></div>NSTP 1</div>
+    <div class="legend-item"><div class="legend-color vacant"></div>Vacant Time</div>
+  </div>
+
+  <!-- Notes Modal -->
+  <div id="notes-modal" role="dialog" aria-modal="true" aria-labelledby="notes-modal-title" aria-hidden="true">
+    <div class="modal-content" tabindex="0">
+      <button class="modal-close" aria-label="Close notes modal">&times;</button>
+      <h2 id="notes-modal-title" class="modal-header">Notes & Reminders</h2>
+      <form id="notes-form">
+        <label for="note-day">Day</label>
+        <select id="note-day" name="note-day" required>
+          <option value="monday">Monday</option>
+          <option value="tuesday">Tuesday</option>
+          <option value="wednesday">Wednesday</option>
+          <option value="friday">Friday</option>
+          <option value="saturday">Saturday</option>
+        </select>
+
+        <label for="note-subject">Subject</label>
+        <select id="note-subject" name="note-subject" required>
+          <!-- options filled dynamically -->
+        </select>
+
+        <label for="note-text">Your Notes / Reminders</label>
+        <textarea id="note-text" name="note-text" placeholder="Write your homework, reminders, or to-do list here..." required></textarea>
+
+        <button type="submit" class="btn-save">Save Notes</button>
+      </form>
+    </div>
+  </div>
+
+<script>
+  // Day buttons to toggle schedule
+  const dayButtons = document.querySelectorAll('.day-btn');
+  const scheduleDays = document.querySelectorAll('.schedule-day');
+
+  dayButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      dayButtons.forEach(b => b.classList.remove('active'));
+      scheduleDays.forEach(day => day.classList.remove('active'));
+
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.day).classList.add('active');
+    });
+  });
+
+  // Notes Modal logic
+  const notesBtn = document.getElementById('notes-btn');
+  const notesModal = document.getElementById('notes-modal');
+  const modalCloseBtn = notesModal.querySelector('.modal-close');
+  const noteDaySelect = document.getElementById('note-day');
+  const noteSubjectSelect = document.getElementById('note-subject');
+  const noteTextArea = document.getElementById('note-text');
+  const notesForm = document.getElementById('notes-form');
+
+  // Gather all unique subjects grouped by day
+  const scheduleBlocks = document.querySelectorAll('.block[data-subject]');
+  const subjectsByDay = {};
+
+  scheduleBlocks.forEach(block => {
+    const day = block.dataset.day;
+    const subject = block.dataset.subject;
+    if (!subjectsByDay[day]) subjectsByDay[day] = new Set();
+    subjectsByDay[day].add(subject);
+  });
+
+  // Populate subjects dropdown based on selected day
+  function populateSubjects(day) {
+    const subjects = subjectsByDay[day] ? Array.from(subjectsByDay[day]).sort() : [];
+    noteSubjectSelect.innerHTML = '';
+    if (subjects.length === 0) {
+      noteSubjectSelect.innerHTML = '<option value="" disabled>No subjects available</option>';
+    } else {
+      subjects.forEach(subj => {
+        const option = document.createElement('option');
+        option.value = subj;
+        option.textContent = subj;
+        noteSubjectSelect.appendChild(option);
+      });
+    }
+  }
+
+  // Load note if exists for day+subject
+  function loadNote() {
+    const day = noteDaySelect.value;
+    const subject = noteSubjectSelect.value;
+    if (!day || !subject) {
+      noteTextArea.value = '';
+      return;
+    }
+    const key = `notes_${day}_${subject}`;
+    const savedNote = localStorage.getItem(key);
+    noteTextArea.value = savedNote || '';
+  }
+
+  // Save note
+  notesForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const day = noteDaySelect.value;
+    const subject = noteSubjectSelect.value;
+    const noteText = noteTextArea.value.trim();
+
+    if (day && subject) {
+      const key = `notes_${day}_${subject}`;
+      if (noteText.length > 0) {
+        localStorage.setItem(key, noteText);
+      } else {
+        localStorage.removeItem(key);
+      }
+      alert('Notes saved!');
+      updateNoteIcons();
+      closeModal();
+    }
+  });
+
+  // Update note icons visibility in schedule blocks if notes exist
+  function updateNoteIcons() {
+    scheduleBlocks.forEach(block => {
+      const day = block.dataset.day;
+      const subject = block.dataset.subject;
+      const key = `notes_${day}_${subject}`;
+      const hasNote = !!localStorage.getItem(key);
+      const noteIcon = block.querySelector('.note-icon');
+      if (noteIcon) {
+        if (hasNote) {
+          noteIcon.style.color = '#f39c12'; // highlighted color
+          noteIcon.title = "View/Edit notes (You have notes)";
+        } else {
+          noteIcon.style.color = '#999'; // default grey
+          noteIcon.title = "View/Edit notes (No notes)";
+        }
+      }
+    });
+  }
+
+  // Open modal
+  function openModal(day = null, subject = null) {
+    notesModal.classList.add('active');
+    notesModal.setAttribute('aria-hidden', 'false');
+    // If day provided, select it, else current day tab
+    if (day) {
+      noteDaySelect.value = day;
+    } else {
+      const activeDayBtn = document.querySelector('.day-btn.active');
+      if (activeDayBtn) noteDaySelect.value = activeDayBtn.dataset.day;
+    }
+    populateSubjects(noteDaySelect.value);
+    // If subject provided, select it, else first subject
+    if (subject) {
+      noteSubjectSelect.value = subject;
+    }
+    loadNote();
+    noteTextArea.focus();
+  }
+
+  // Close modal
+  function closeModal() {
+    notesModal.classList.remove('active');
+    notesModal.setAttribute('aria-hidden', 'true');
+    notesForm.reset();
+  }
+
+  // Event listeners
+  notesBtn.addEventListener('click', () => openModal());
+
+  modalCloseBtn.addEventListener('click', closeModal);
+
+  // Close modal on click outside content
+  notesModal.addEventListener('click', e => {
+    if (e.target === notesModal) closeModal();
+  });
+
+  // Change subjects dropdown when day changes
+  noteDaySelect.addEventListener('change', () => {
+    populateSubjects(noteDaySelect.value);
+    loadNote();
+  });
+
+  // Load note when subject changes
+  noteSubjectSelect.addEventListener('change', loadNote);
+
+  // Clicking note icon on schedule block opens modal with that subject and day
+  document.querySelectorAll('.note-icon').forEach(icon => {
+    icon.addEventListener('click', e => {
+      e.stopPropagation();
+      const block = e.target.closest('.block');
+      if (!block) return;
+      const day = block.dataset.day;
+      const subject = block.dataset.subject;
+      openModal(day, subject);
+    });
+  });
+
+  // Initialize note icons colors on load
+  updateNoteIcons();
+
+  // Accessibility: trap focus inside modal when open (basic)
+  notesModal.addEventListener('keydown', e => {
+    if (!notesModal.classList.contains('active')) return;
+    if (e.key === 'Tab') {
+      const focusable = notesModal.querySelectorAll('button, select, textarea');
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+    if (e.key === 'Escape') {
+      closeModal();
+    }
+  });
+</script>
+
+</body>
+</html>
