@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Multimedia Arts 1st Semester</title>
+<style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f9;
+      padding: 20px;
+      color: #333;
+      max-width: 900px;
+      margin: auto;
+      position: relative;
+      min-height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      margin-bottom: 25px;
+      color: #222;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+    }
+
+    /* Day buttons */
+    .day-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 35px;
+      flex-wrap: wrap;
+    }
+    .day-btn {
+      background-color: #ddd;
+      border: none;
+      padding: 12px 22px;
+      font-weight: 700;
+      font-size: 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #333;
+      transition: background-color 0.3s ease;
+      min-width: 90px;
+      text-align: center;
+    }
+    .day-btn:hover {
+      background-color: #bbb;
+    }
+    .day-btn.active {
+      background-color: #222;
+      color: white;
+    }
+
+    /* Schedule container */
+    .schedule-day {
+      display: none;
+      background-color: white;
+      padding: 24px 30px;
+      border-radius: 10px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+      margin-bottom: 45px;
+    }
+    .schedule-day.active {
+      display: block;
+    }
+
+    /* Schedule blocks */
+    .block {
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      color: #111;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease;
+      position: relative;
+    }
+    .block:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    .math {background-color: #e6f0ff;}
+    .pe {background-color: #e9f7ef;}
+    .socsci {background-color: #fff8e1;}
+    .arts {background-color: #f3e9ff;}
+    .ethics {background-color: #e0f8fa;}
+    .nstp {background-color: #fdecea;}
+    .vacant {background-color: #e1f5fe; color: #0277bd; font-weight: 700;}
+
+    /* Subject and Section */
+    .subject-section {
+      font-size: 20px;
+      color: #222;
+      margin-bottom: 10px;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Time styling */
+    .time {
+      font-size: 16px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    /* Room and Instructor styling */
+    .info-row {
+      font-size: 15px;
+      font-weight: 500;
+      color: #444;
+      margin-bottom: 4px;
+    }
+
+    .label {
+      font-weight: 700;
+      color: #555;
+      margin-right: 8px;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      justify-content: center;
+      margin-top: 35px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #333;
+    }
+    .legend-color {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+    }
+
+    /* Floating notes button */
+    #notes-btn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      background-color: #222;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      transition: background-color 0.3s ease;
+    }
+    #notes-btn:hover {
+      background-color: #555;
+    }
+
+    /* Note icon in subject */
+    .note-icon {
+      font-size: 18px;
+      color: #f39c12;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease;
+    }
+    .note-icon:hover {
+      transform: scale(1.2);
+    }
+
+    /* Modal overlay */
+    #notes-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    #notes-modal.active {
+      display: flex;
+    }
+
+    /* Modal content */
+    .modal-content {
+      background: white;
+      width: 100%;
+      max-width: 700px;
+      max-height: 90vh;
+      border-radius: 12px;
+      padding: 25px 30px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-y: auto;
+    }
+
+    /* Modal header */
+    .modal-header {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #222;
+    }
+
+    /* Close button */
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 28px;
+      font-weight: 700;
+      color: #777;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    .modal-close:hover {
+      color: #222;
+    }
+
+    /* Form elements */
+    label {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 6px;
+      display: block;
+      color: #333;
+    }
+    select, textarea {
+      width: 100%;
+      font-size: 15px;
+      padding: 10px 12px;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      border: 1.5px solid #ccc;
+      resize: vertical;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: border-color 0.3s ease;
+    }
+    select:focus, textarea:focus {
+      border-color: #222;
+      outline: none;
+    }
+    textarea {
+      min-height: 140px;
+    }
+
+    /* Save button */
+    .btn-save {
+      align-self: center;
+      background-color: #222;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: auto;
+      max-width: 200px;
+    }
+    .btn-save:hover {
+      background-color: #444;
+    }
+
+    
+/* Note tooltip box */
+.note-tooltip {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 10px;
+  background-color: #fffbe6;
+  color: #333;
+  border: 1px solid #f39c12;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 280px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 10;
+  white-space: pre-wrap;
+}
+
+/* Show on hover */
+.block.has-note:hover .note-tooltip {
+  display: block;
+}
+
+/* For touch devices (will toggle via JS) */
+.block.show-tooltip .note-tooltip {
+  display: block;
+}
+
+.block.has-note {
+  border-left: 5px solid #f39c12;
+}
+
+    /* Responsive for small devices */
+    @media (max-width: 480px) {
+      .modal-content {
+        padding: 18px 20px;
+      }
+      h1 {
+        font-size: 26px;
+      }
+      .day-btn {
+        font-size: 16px;
+        padding: 10px 18px;
+      }
+      .subject-section {
+        font-size: 18px;
+      }
+      .time {
+        font-size: 14px;
+      }
+    }
+  
+/* Checklist floating button */
+#checklist-btn {
+  position: fixed;
+  top: 16px;
+  left: 76px;
+  background-color: #2d8f2d;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  transition: background-color 0.3s ease;
+}
+#checklist-btn:hover { background-color: #3fb43f; }
+
+/* Checklist modal - reuse the notes modal visual style */
+#checklist-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+#checklist-modal.active {
+  display: flex;
+}
+
+/* Bulk delete button */
+#bulk-delete-btn {
+  position: fixed;
+  top: 16px;
+  left: 136px;
+  background-color: #b23b3b;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  transition: background-color 0.3s ease;
+}
+#bulk-delete-btn:hover { background-color: #d94c4c; }
+
+/* Bulk delete modal */
+#bulk-delete-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+#bulk-delete-modal.active {
+  display: flex;
+}
+
+
+/* Reminders floating button */
+#reminders-btn {
+  position: fixed;
+  top: 16px;
+  left: 196px;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  transition: background-color 0.3s ease;
+  /* create a positioned context for the badge */
+  position: fixed;
+}
+#reminders-btn:hover { background-color: #3399ff; }
+
+/* badge */
+#reminders-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #e74c3c;
+  color: white;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  display: none; /* hidden when zero */
+}
+
+
+
+/* Ensure All Reminders modal is centered */
+#reminders-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+#reminders-modal.active {
+  display: flex;
+}
+
+
+/* --- Reminder Button Enhancements --- */
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 119, 204, 0.6); }
+  70% { transform: scale(1.08); box-shadow: 0 0 0 12px rgba(0, 119, 204, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 119, 204, 0); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+#reminders-btn.pulse { animation: pulse 2s infinite; }
+#reminders-btn:hover { box-shadow: 0 0 12px rgba(0, 119, 204, 0.8); }
+#reminders-btn.bounce { animation: bounce 0.3s ease; }
+#reminders-btn.has-reminders { background-color: #ff9800; }
+
+</style>
+</head>
+<body>
+<button id="notes-btn" title="Open Notes">📝</button>
+<button id="checklist-btn" title="Open Checklists">✅</button>
+<button id="bulk-delete-btn" title="Bulk Delete Notes">🗑️</button>
+<button id="reminders-btn" title="View All Reminders" aria-label="View All Reminders">📋<span id="reminders-badge" aria-hidden="true">0</span></button>
+
+<h1>Multimedia Arts 1st Semester</h1>
+<div class="day-buttons">
+<button class="day-btn active" data-day="monday">Monday</button>
+<button class="day-btn" data-day="tuesday">Tuesday</button>
+<button class="day-btn" data-day="wednesday">Wednesday</button>
+<button class="day-btn" data-day="friday">Friday</button>
+<button class="day-btn" data-day="saturday">Saturday</button>
+</div>
+<!-- Schedule Days -->
+<!-- Monday -->
+<div class="schedule-day active" id="monday">
+<div class="block math" data-day="monday" data-subject="Mathematics in the Modern World">
+<div class="subject-section">
+        Mathematics in the Modern World (MATH01G) - BSN101
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+</div>
+<div class="time">09:00 AM – 10:30 AM</div>
+<div class="info-row"><span class="label">Room:</span>J320</div>
+<div class="info-row"><span class="label">Instructor:</span>TBD</div>
+</div>
+<div class="block socsci" data-day="monday" data-subject="Understanding the Self">
+<div class="subject-section">
+        Understanding the Self (UTSN01G) - BSN101
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+</div>
+<div class="time">10:30 AM – 12:00 PM</div>
+<div class="info-row"><span class="label">Room:</span>J320</div>
+<div class="info-row"><span class="label">Instructor:</span>TBD</div>
+</div>
+<div class="block vacant">
+<div class="subject-section">Vacant Time</div>
+<div class="time">12:00 PM – 01:00 PM</div>
+</div>
+<div class="block pe" data-day="monday" data-subject="Physical Activities Toward Health and Fitness 1">
+<div class="subject-section">
+        Physical Activities Toward Health and Fitness 1 (PATHFit1) - MMA105
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+</div>
+<div class="time">01:00 PM – 03:00 PM</div>
+<div class="info-row"><span class="label">Room:</span>SRDB1</div>
+<div class="info-row"><span class="label">Instructor:</span>Benjo Martinez</div>
+</div>
+</div>
+<!-- Tuesday -->
+<div class="schedule-day" id="tuesday">
+<div class="block arts" data-day="tuesday" data-subject="History of Graphic Design">
+<div class="subject-section">
+        History of Graphic Design (MAHSGRP) - MMA105
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+</div>
+<div class="time">08:30 AM – 11:30 AM</div>
+<div class="info-row"><span class="label">Room:</span>C710</div>
+<div class="info-row"><span class="label">Instructor:</span>TBD</div>
+</div>
+<div class="block vacant">
+<div class="subject-section">Vacant Time</div>
+<div class="time">11:30 AM – 02:00 PM</div>
+</div>
+<div class="block arts" data-day="tuesday" data-subject="Introduction to Multimedia Arts">
+<div class="subject-section">
+        Introduction to Multimedia Arts (MAINTRO) - MMA105
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+</div>
+<div class="time">02:00 PM – 05:00 PM</div>
+<div class="info-row"><span class="label">Room:</span>C303</div>
+<div class="info-row"><span class="label">Instructor:</span>TBD</div>
+</div>
+</div>
+<!-- Wednesday -->
+<div class="schedule-day" id="wednesday">
+<div class="block math" data-day="wednesday" data-subject="Mathematics in the Modern World">
+<div class="subject-section">
+        Mathematics in the Modern World (MATH01G) - BSN101
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+</div>
+<div class="time">09:00 AM – 10:30 AM</div>
+<div class="info-row"><span class="label">Room:</span>TBD</div>
+<div class="info-row"><span class="label">Instructor:</span>TBD</div>
+</div>
+<div class="block socsci" data-day="wednesday" data-subject="Understanding the Self">
+<div class="subject-section">
+        Understanding the Self (UTSN01G) - BSN101
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+</div>
+<div class="time">10:30 AM – 12:00 PM</div>
+<div class="info-row"><span class="label">Room:</span>J320</div>
+<div class="info-row"><span class="label">Instructor:</span>TBD</div>
+</div>
+<div class="block vacant">
+<div class="subject-section">Vacant Time</div>
+<div class="time">12:00 PM – 01:00 PM</div>
+</div>
+<div class="block arts" data-day="wednesday" data-subject="Drawing 1: Basic Form and Shape (Part 1)">
+<div class="subject-section">
+        Drawing 1: Basic Form and Shape (MADRWG1) - MMA105 (Part 1)
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+</div>
+<div class="time">01:00 PM – 02:00 PM</div>
+<div class="info-row"><span class="label">Room:</span>C308</div>
+<div class="info-row"><span class="label">Instructor:</span>TBD</div>
+</div>
+<div class="block vacant">
+<div class="subject-section">Vacant Time</div>
+<div class="time">02:00 PM – 02:30 PM</div>
+</div>
+<div class="block arts" data-day="wednesday" data-subject="Drawing 1: Basic Form and Shape (Part 2)">
+<div class="subject-section">
+        Drawing 1: Basic Form and Shape (MADRWG1) - MMA105 (Part 2)
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+</div>
+<div class="time">02:30 PM – 05:30 PM</div>
+<div class="info-row"><span class="label">Room:</span>C308</div>
+<div class="info-row"><span class="label">Instructor:</span>TBD</div>
+</div>
+</div>
+<!-- Friday -->
+<div class="schedule-day" id="friday">
+<div class="block ethics" data-day="friday" data-subject="Ethics">
+<div class="subject-section">
+        Ethics (ETHN01G) - MMA104
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+</div>
+<div class="time">11:30 AM – 01:00 PM</div>
+<div class="info-row"><span class="label">Room:</span>C708</div>
+<div class="info-row"><span class="label">Instructor:</span>Schealynne Cleos Estrada</div>
+</div>
+</div>
+<!-- Saturday -->
+<div class="schedule-day" id="saturday">
+
+<div class="block ethics" data-day="saturday" data-subject="Ethics">
+<div class="subject-section">
+    Ethics (ETHN01G) - MMA104
+    <span class="note-icon" title="View/Edit notes">🗒️</span>
+</div>
+<div class="time">11:30 AM – 01:00 PM</div>
+<div class="info-row"><span class="label">Room:</span>C708</div>
+<div class="info-row"><span class="label">Instructor:</span>Schealynne Cleos Estrada</div>
+</div>
+<div class="block nstp" data-day="saturday" data-subject="NSTP 1">
+<div class="subject-section">
+        NSTP 1 - MMA104
+        <span class="note-icon" title="View/Edit notes">🗒️</span>
+</div>
+<div class="time">01:00 PM – 04:00 PM</div>
+<div class="info-row"><span class="label">Room:</span>TBD</div>
+<div class="info-row"><span class="label">Instructor:</span>TBD</div>
+</div>
+</div>
+<!-- Legend -->
+<div class="legend">
+<div class="legend-item"><div class="legend-color math"></div>Mathematics in the Modern World</div>
+<div class="legend-item"><div class="legend-color pe"></div>Physical Activities Toward Health and Fitness 1</div>
+<div class="legend-item"><div class="legend-color socsci"></div>Understanding the Self</div>
+<div class="legend-item"><div class="legend-color arts"></div>Drawing, History, Multimedia Arts</div>
+<div class="legend-item"><div class="legend-color ethics"></div>Ethics</div>
+<div class="legend-item"><div class="legend-color nstp"></div>NSTP 1</div>
+<div class="legend-item"><div class="legend-color vacant"></div>Vacant Time</div>
+</div>
+<!-- Notes Modal -->
+<div aria-hidden="true" aria-labelledby="notes-modal-title" aria-modal="true" id="notes-modal" role="dialog">
+<div class="modal-content" tabindex="0">
+<button aria-label="Close notes modal" class="modal-close">×</button>
+<h2 class="modal-header" id="notes-modal-title">Notes &amp; Reminders</h2>
+<form id="notes-form">
+<label for="note-day">Day</label>
+<select id="note-day" name="note-day" required="">
+<option value="monday">Monday</option>
+<option value="tuesday">Tuesday</option>
+<option value="wednesday">Wednesday</option>
+<option value="friday">Friday</option>
+<option value="saturday">Saturday</option>
+</select>
+<label for="note-subject">Subject</label>
+<select id="note-subject" name="note-subject" required="">
+<!-- options filled dynamically -->
+</select>
+<label for="note-text">Your Notes / Reminders</label>
+<textarea id="note-text" name="note-text" placeholder="Write your homework, reminders, or to-do list here..." required=""></textarea>
+<button class="btn-save" type="submit">Save Notes</button>
+</form>
+</div>
+</div>
+
+
+<!-- Bulk Delete Notes Modal -->
+<div aria-hidden="true" aria-labelledby="bulk-delete-modal-title" aria-modal="true" id="bulk-delete-modal" role="dialog">
+  <div class="modal-content" tabindex="0">
+    <button aria-label="Close bulk delete modal" class="modal-close">×</button>
+    <h2 class="modal-header" id="bulk-delete-modal-title">Bulk Delete Notes</h2>
+    <form id="bulk-delete-form">
+      <p>Select the notes you want to delete:</p>
+      <div id="bulk-notes-list" style="max-height:300px;overflow-y:auto;border:1px solid #ccc;padding:8px;border-radius:6px;margin-bottom:10px;">
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:12px;">
+        <button type="button" id="delete-all-notes" style="background:#c0392b;color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;">Delete All Notes</button>
+        <button class="btn-save" type="submit">Delete Selected</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Checklist Modal -->
+<div aria-hidden="true" aria-labelledby="checklist-modal-title" aria-modal="true" id="checklist-modal" role="dialog">
+  <div class="modal-content" tabindex="0">
+    <button aria-label="Close checklist modal" class="modal-close">×</button>
+    <h2 class="modal-header" id="checklist-modal-title">Checklists &amp; Manage Notes</h2>
+    <form id="checklist-form">
+      <label for="check-day">Day</label>
+      <select id="check-day" name="check-day" required>
+        <option value="monday">Monday</option>
+        <option value="tuesday">Tuesday</option>
+        <option value="wednesday">Wednesday</option>
+        <option value="friday">Friday</option>
+        <option value="saturday">Saturday</option>
+      </select>
+
+      <label for="check-subject">Subject</label>
+      <select id="check-subject" name="check-subject" required>
+        <!-- populated dynamically -->
+      </select>
+
+      <div id="checklist-area" style="margin-top:12px;">
+        <label>Your Checklist</label>
+        <ul id="checklist-list" style="list-style:none;padding:0;margin-bottom:10px;"></ul>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="check-new-item" placeholder="New item..." style="flex:1;padding:8px;border-radius:6px;border:1px solid #ccc;">
+          <button type="button" id="check-add-btn" style="padding:8px 12px;border-radius:8px;border:none;background:#222;color:#fff;cursor:pointer;">Add</button>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+        <button type="button" id="delete-specific-note" style="background:#c0392b;color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;">Delete Note for this Schedule</button>
+        <button type="button" id="delete-checklist" style="background:#c0392b;color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;">Delete Checklist</button>
+        <button class="btn-save" type="submit">Save Checklist</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Day buttons to toggle schedule
+  const dayButtons = document.querySelectorAll('.day-btn');
+  const scheduleDays = document.querySelectorAll('.schedule-day');
+
+  dayButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      dayButtons.forEach(b => b.classList.remove('active'));
+      scheduleDays.forEach(day => day.classList.remove('active'));
+
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.day).classList.add('active');
+    });
+  });
+
+  // Notes Modal logic
+  const notesBtn = document.getElementById('notes-btn');
+  const notesModal = document.getElementById('notes-modal');
+  const modalCloseBtn = notesModal.querySelector('.modal-close');
+  const noteDaySelect = document.getElementById('note-day');
+  const noteSubjectSelect = document.getElementById('note-subject');
+  const noteTextArea = document.getElementById('note-text');
+  const notesForm = document.getElementById('notes-form');
+
+  // Gather all unique subjects grouped by day
+  const scheduleBlocks = document.querySelectorAll('.block[data-subject]');
+  const subjectsByDay = {};
+
+  scheduleBlocks.forEach(block => {
+    const day = block.dataset.day;
+    const subject = block.dataset.subject;
+    if (!subjectsByDay[day]) subjectsByDay[day] = new Set();
+    subjectsByDay[day].add(subject);
+  });
+
+  // Populate subjects dropdown based on selected day
+  function populateSubjects(day) {
+    const subjects = subjectsByDay[day] ? Array.from(subjectsByDay[day]).sort() : [];
+    noteSubjectSelect.innerHTML = '';
+    if (subjects.length === 0) {
+      noteSubjectSelect.innerHTML = '<option value="" disabled>No subjects available</option>';
+    } else {
+      subjects.forEach(subj => {
+        const option = document.createElement('option');
+        option.value = subj;
+        option.textContent = subj;
+        noteSubjectSelect.appendChild(option);
+      });
+    }
+  }
+
+  // Load note if exists for day+subject
+  function loadNote() {
+    const day = noteDaySelect.value;
+    const subject = noteSubjectSelect.value;
+    if (!day || !subject) {
+      noteTextArea.value = '';
+      return;
+    }
+    const key = `notes_${day}_${subject}`;
+    const savedNote = localStorage.getItem(key);
+    noteTextArea.value = savedNote || '';
+  }
+
+  // Save note
+  notesForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const day = noteDaySelect.value;
+    const subject = noteSubjectSelect.value;
+    const noteText = noteTextArea.value.trim();
+
+    if (day && subject) {
+      const key = `notes_${day}_${subject}`;
+      if (noteText.length > 0) {
+        localStorage.setItem(key, noteText);
+      } else {
+        localStorage.removeItem(key);
+      }
+      alert('Notes saved!');
+// Trigger bounce animation
+const btn = document.getElementById('reminders-btn');
+btn.classList.add('bounce');
+setTimeout(() => btn.classList.remove('bounce'), 300);
+
+      updateNoteIcons();
+      attachTooltips();
+      if (window.updateRemindersBadge) window.updateRemindersBadge();
+      if (window.updateRemindersBadge) window.updateRemindersBadge();
+      closeModal();
+    }
+  });
+
+  // Update note icons visibility in schedule blocks if notes exist
+  function updateNoteIcons() {
+    scheduleBlocks.forEach(block => {
+      const day = block.dataset.day;
+      const subject = block.dataset.subject;
+      const key = `notes_${day}_${subject}`;
+      const hasNote = !!localStorage.getItem(key);
+      const noteIcon = block.querySelector('.note-icon');
+      if (noteIcon) {
+        if (hasNote) {
+          noteIcon.style.color = '#f39c12'; // highlighted color
+          noteIcon.title = "View/Edit notes (You have notes)";
+        } else {
+          noteIcon.style.color = '#999'; // default grey
+          noteIcon.title = "View/Edit notes (No notes)";
+        }
+      }
+    });
+  }
+
+  // Open modal
+  function openModal(day = null, subject = null) {
+    notesModal.classList.add('active');
+    notesModal.setAttribute('aria-hidden', 'false');
+    // If day provided, select it, else current day tab
+    if (day) {
+      noteDaySelect.value = day;
+    } else {
+      const activeDayBtn = document.querySelector('.day-btn.active');
+      if (activeDayBtn) noteDaySelect.value = activeDayBtn.dataset.day;
+    }
+    populateSubjects(noteDaySelect.value);
+    // If subject provided, select it, else first subject
+    if (subject) {
+      noteSubjectSelect.value = subject;
+    }
+    loadNote();
+    noteTextArea.focus();
+  }
+
+  // Close modal
+  function closeModal() {
+    notesModal.classList.remove('active');
+    notesModal.setAttribute('aria-hidden', 'true');
+    notesForm.reset();
+  }
+
+  // Event listeners
+  notesBtn.addEventListener('click', () => openModal());
+
+  modalCloseBtn.addEventListener('click', closeModal);
+
+  // Close modal on click outside content
+  notesModal.addEventListener('click', e => {
+    if (e.target === notesModal) closeModal();
+  });
+
+  // Change subjects dropdown when day changes
+  noteDaySelect.addEventListener('change', () => {
+    populateSubjects(noteDaySelect.value);
+    loadNote();
+  });
+
+  // Load note when subject changes
+  noteSubjectSelect.addEventListener('change', loadNote);
+
+  // Clicking note icon on schedule block opens modal with that subject and day
+  document.querySelectorAll('.note-icon').forEach(icon => {
+    icon.addEventListener('click', e => {
+      e.stopPropagation();
+      const block = e.target.closest('.block');
+      if (!block) return;
+      const day = block.dataset.day;
+      const subject = block.dataset.subject;
+      openModal(day, subject);
+    });
+  });
+
+  
+// Show notes on hover or long press
+function attachTooltips() {
+  scheduleBlocks.forEach(block => {
+    const day = block.dataset.day;
+    const subject = block.dataset.subject;
+    const key = `notes_${day}_${subject}`;
+    const note = localStorage.getItem(key);
+    
+    // If note exists, create tooltip
+    let tooltip = block.querySelector('.note-tooltip');
+    if (!tooltip && note) {
+      tooltip = document.createElement('div');
+      tooltip.classList.add('note-tooltip');
+      block.appendChild(tooltip);
+    }
+    if (tooltip) {
+      tooltip.textContent = note || '';
+    }
+
+    // Add has-note class for highlighting
+    if (note) {
+      block.classList.add('has-note');
+    } else {
+      block.classList.remove('has-note');
+    }
+
+    // Mobile long press logic
+    let pressTimer;
+    block.addEventListener('touchstart', function(e) {
+      pressTimer = setTimeout(() => {
+        block.classList.add('show-tooltip');
+        setTimeout(() => block.classList.remove('show-tooltip'), 3000); // Hide after 3s
+      }, 600);
+    }, false);
+
+    block.addEventListener('touchend', function(e) {
+      clearTimeout(pressTimer);
+    });
+  });
+}
+
+  // Initialize note icons colors on load
+  updateNoteIcons();
+  attachTooltips();
+
+  // Accessibility: trap focus inside modal when open (basic)
+  notesModal.addEventListener('keydown', e => {
+    if (!notesModal.classList.contains('active')) return;
+    if (e.key === 'Tab') {
+      const focusable = notesModal.querySelectorAll('button, select, textarea');
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+    if (e.key === 'Escape') {
+      closeModal();
+    }
+  });
+
+// --- Checklist modal + management logic ---
+(function(){
+  // Elements for checklist modal
+  const checklistBtn = document.getElementById('checklist-btn');
+  const checklistModal = document.getElementById('checklist-modal');
+  const checklistCloseBtn = checklistModal.querySelector('.modal-close');
+  const checkDaySelect = document.getElementById('check-day');
+  const checkSubjectSelect = document.getElementById('check-subject');
+  const checklistList = document.getElementById('checklist-list');
+  const checkNewItem = document.getElementById('check-new-item');
+  const checkAddBtn = document.getElementById('check-add-btn');
+  const checklistForm = document.getElementById('checklist-form');
+  const deleteSpecificNoteBtn = document.getElementById('delete-specific-note');
+  const deleteChecklistBtn = document.getElementById('delete-checklist');
+
+  // active checklist array for the currently-selected day+subject in this modal
+  let activeChecklist = [];
+
+  // populate subjects (re-uses subjectsByDay built earlier in the script)
+  function populateCheckSubjects(day) {
+    const subjects = subjectsByDay[day] ? Array.from(subjectsByDay[day]).sort() : [];
+    checkSubjectSelect.innerHTML = '';
+    if (subjects.length === 0) {
+      const option = document.createElement('option');
+      option.value = '';
+      option.disabled = true;
+      option.textContent = 'No subjects available';
+      checkSubjectSelect.appendChild(option);
+    } else {
+      subjects.forEach(subj => {
+        const option = document.createElement('option');
+        option.value = subj;
+        option.textContent = subj;
+        checkSubjectSelect.appendChild(option);
+      });
+    }
+  }
+
+  // render activeChecklist into the UL
+  function renderActiveChecklist() {
+    checklistList.innerHTML = '';
+    activeChecklist.forEach((item, idx) => {
+      const li = document.createElement('li');
+      li.style.display = 'flex';
+      li.style.alignItems = 'center';
+      li.style.gap = '8px';
+      li.style.marginBottom = '6px';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = !!item.done;
+      checkbox.addEventListener('change', () => {
+        activeChecklist[idx].done = checkbox.checked;
+        saveActiveChecklist();
+        // update text decoration
+        span.style.textDecoration = checkbox.checked ? 'line-through' : '';
+      });
+
+      const span = document.createElement('span');
+      span.textContent = item.text || '';
+      if (item.done) span.style.textDecoration = 'line-through';
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent = '✕';
+      delBtn.style.border = 'none';
+      delBtn.style.background = 'transparent';
+      delBtn.style.cursor = 'pointer';
+      delBtn.addEventListener('click', () => {
+        activeChecklist.splice(idx, 1);
+        saveActiveChecklist();
+        renderActiveChecklist();
+      });
+
+      li.appendChild(checkbox);
+      li.appendChild(span);
+      li.appendChild(delBtn);
+      checklistList.appendChild(li);
+    });
+  }
+
+  // load checklist for selected day+subject
+  function loadActiveChecklist() {
+    const day = checkDaySelect.value;
+    const subject = checkSubjectSelect.value;
+    if (!day || !subject) {
+      activeChecklist = [];
+      renderActiveChecklist();
+      return;
+    }
+    const key = `checklist_${day}_${subject}`;
+    try {
+      activeChecklist = JSON.parse(localStorage.getItem(key) || '[]');
+    } catch (err) {
+      activeChecklist = [];
+    }
+    renderActiveChecklist();
+  }
+
+  // save current activeChecklist
+  function saveActiveChecklist() {
+    const day = checkDaySelect.value;
+    const subject = checkSubjectSelect.value;
+    if (!day || !subject) return;
+    const key = `checklist_${day}_${subject}`;
+    localStorage.setItem(key, JSON.stringify(activeChecklist));
+  }
+
+  // Open checklist modal
+  checklistBtn.addEventListener('click', () => {
+    checklistModal.classList.add('active');
+    checklistModal.setAttribute('aria-hidden', 'false');
+    // default day = currently active tab
+    const activeDayBtn = document.querySelector('.day-btn.active');
+    if (activeDayBtn) checkDaySelect.value = activeDayBtn.dataset.day;
+    populateCheckSubjects(checkDaySelect.value);
+    // select first subject if exists
+    if (checkSubjectSelect.options && checkSubjectSelect.options.length) {
+      checkSubjectSelect.selectedIndex = 0;
+    }
+    loadActiveChecklist();
+    checkNewItem.focus();
+  });
+
+  // Close handlers
+  checklistCloseBtn.addEventListener('click', () => {
+    checklistModal.classList.remove('active');
+    checklistModal.setAttribute('aria-hidden', 'true');
+    checklistForm.reset();
+  });
+  checklistModal.addEventListener('click', (e) => {
+    if (e.target === checklistModal) {
+      checklistModal.classList.remove('active');
+      checklistModal.setAttribute('aria-hidden', 'true');
+      checklistForm.reset();
+    }
+  });
+
+  // change handlers
+  checkDaySelect.addEventListener('change', () => {
+    populateCheckSubjects(checkDaySelect.value);
+    // auto-select first subject and load
+    if (checkSubjectSelect.options && checkSubjectSelect.options.length) checkSubjectSelect.selectedIndex = 0;
+    loadActiveChecklist();
+  });
+  checkSubjectSelect.addEventListener('change', loadActiveChecklist);
+
+  // add new item button
+  checkAddBtn.addEventListener('click', () => {
+    const text = checkNewItem.value.trim();
+    if (!text) return;
+    activeChecklist.push({ text, done: false });
+    checkNewItem.value = '';
+    saveActiveChecklist();
+    renderActiveChecklist();
+  });
+
+  // submit (save)
+  checklistForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    saveActiveChecklist();
+    alert('Checklist saved!');
+    checklistModal.classList.remove('active');
+    checklistModal.setAttribute('aria-hidden', 'true');
+    checklistForm.reset();
+  });
+
+  // delete note for this schedule (day+subject)
+  deleteSpecificNoteBtn.addEventListener('click', () => {
+    const day = checkDaySelect.value;
+    const subject = checkSubjectSelect.value;
+    if (!day || !subject) {
+      alert('Please select a day and subject first.');
+      return;
+    }
+    const key = `notes_${day}_${subject}`;
+    if (!localStorage.getItem(key)) {
+      alert('No note found for this schedule.');
+      return;
+    }
+    if (confirm(`Delete note for "${subject}" on ${day}?`)) {
+      localStorage.removeItem(key);
+      // refresh other UI
+      updateNoteIcons();
+      attachTooltips();
+      if (window.updateRemindersBadge) window.updateRemindersBadge();
+      alert('Note deleted.');
+    }
+  });
+
+  // delete checklist for this schedule (day+subject)
+  deleteChecklistBtn.addEventListener('click', () => {
+    const day = checkDaySelect.value;
+    const subject = checkSubjectSelect.value;
+    if (!day || !subject) {
+      alert('Please select a day and subject first.');
+      return;
+    }
+    const key = `checklist_${day}_${subject}`;
+    if (!localStorage.getItem(key)) {
+      alert('No checklist found for this schedule.');
+      return;
+    }
+    if (confirm(`Delete checklist for "${subject}" on ${day}?`)) {
+      localStorage.removeItem(key);
+      loadActiveChecklist();
+      alert('Checklist deleted.');
+    }
+  });
+
+  // ensure subjectsByDay exists (should already be available earlier in the main script)
+  if (typeof subjectsByDay === 'undefined') {
+    window.subjectsByDay = {};
+    document.querySelectorAll('.block[data-subject]').forEach(block => {
+      const d = block.dataset.day;
+      const s = block.dataset.subject;
+      if (!window.subjectsByDay[d]) window.subjectsByDay[d] = new Set();
+      window.subjectsByDay[d].add(s);
+    });
+  }
+
+})(); // end IIFE
+// --- end checklist logic ---
+
+// --- Bulk delete notes logic ---
+(function(){
+  const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
+  const bulkDeleteModal = document.getElementById('bulk-delete-modal');
+  const bulkCloseBtn = bulkDeleteModal.querySelector('.modal-close');
+  const bulkList = document.getElementById('bulk-notes-list');
+  const bulkForm = document.getElementById('bulk-delete-form');
+  const deleteAllBtn = document.getElementById('delete-all-notes');
+
+  function openBulkModal(){
+    bulkDeleteModal.classList.add('active');
+    bulkDeleteModal.setAttribute('aria-hidden','false');
+    populateBulkList();
+  }
+
+  function closeBulkModal(){
+    bulkDeleteModal.classList.remove('active');
+    bulkDeleteModal.setAttribute('aria-hidden','true');
+    bulkForm.reset();
+  }
+
+  function populateBulkList(){
+    bulkList.innerHTML = '';
+    // Loop through localStorage for notes_
+    for (let i=0; i<localStorage.length; i++){
+      const key = localStorage.key(i);
+      if (key.startsWith('notes_')){
+        const value = localStorage.getItem(key);
+        if (!value) continue;
+        const parts = key.split('_'); // notes, day, subject
+        const day = parts[1];
+        const subject = parts.slice(2).join('_');
+        const label = document.createElement('label');
+        label.style.display = 'block';
+        label.style.marginBottom = '4px';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = key;
+        checkbox.style.marginRight = '6px';
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(day + " - " + subject));
+        bulkList.appendChild(label);
+      }
+    }
+    if (!bulkList.innerHTML){
+      bulkList.innerHTML = '<em>No notes found.</em>';
+    }
+  }
+
+  bulkDeleteBtn.addEventListener('click', openBulkModal);
+  bulkCloseBtn.addEventListener('click', closeBulkModal);
+  bulkDeleteModal.addEventListener('click', e=>{ if(e.target===bulkDeleteModal) closeBulkModal(); });
+
+  bulkForm.addEventListener('submit', e=>{
+    e.preventDefault();
+    const checked = bulkList.querySelectorAll('input[type="checkbox"]:checked');
+    if (!checked.length){
+      alert('No notes selected.');
+      return;
+    }
+    checked.forEach(cb => {
+      localStorage.removeItem(cb.value);
+    });
+    updateNoteIcons();
+    attachTooltips();
+    alert('Selected notes deleted.');
+    closeBulkModal();
+  });
+
+  deleteAllBtn.addEventListener('click', ()=>{
+    if (confirm('Are you sure you want to delete ALL notes for ALL schedules? This cannot be undone.')){
+      // Remove all keys starting with notes_
+      const toDelete = [];
+      for (let i=0; i<localStorage.length; i++){
+        const key = localStorage.key(i);
+        if (key.startsWith('notes_')){
+          toDelete.push(key);
+        }
+      }
+      toDelete.forEach(k=>localStorage.removeItem(k));
+      updateNoteIcons();
+      attachTooltips();
+      if (window.updateRemindersBadge) window.updateRemindersBadge();
+      alert('All notes deleted.');
+      closeBulkModal();
+    }
+  });
+})(); // end bulk delete
+
+// --- Reminders Notification Logic ---
+document.addEventListener('DOMContentLoaded', function(){
+(function(){
+  const remindersBtn = document.getElementById('reminders-btn');
+  const remindersModal = document.getElementById('reminders-modal');
+  const remindersClose = remindersModal ? remindersModal.querySelector('.modal-close') : null;
+  const remindersMinimize = document.getElementById('reminders-minimize');
+  const remindersList = document.getElementById('reminders-list');
+  const badge = document.getElementById('reminders-badge');
+  let minimized = false;
+
+  function updateRemindersBadge(){
+    let count = 0;
+    for (let i=0;i<localStorage.length;i++){
+      const key = localStorage.key(i);
+      if (key && key.startsWith('notes_') && localStorage.getItem(key)) count++;
+    }
+    if (!badge) return;
+    badge.textContent = String(count);
+    badge.style.display = count > 0 ? 'flex' : 'none';
+  }
+
+  function populateRemindersList(){
+    if (!remindersList) return;
+    remindersList.innerHTML = '';
+    let hasNotes = false;
+    const daysOrder = ['monday','tuesday','wednesday','friday','saturday'];
+    daysOrder.forEach(day => {
+      for (let i=0; i<localStorage.length; i++){
+        const key = localStorage.key(i);
+        if (key && key.startsWith('notes_'+day+'_')){
+          const note = localStorage.getItem(key);
+          if (!note) continue;
+          hasNotes = true;
+          const subject = key.split('_').slice(2).join('_');
+          const div = document.createElement('div');
+          div.style.borderBottom = '1px solid #ddd';
+          div.style.padding = '6px 0';
+          div.innerHTML = '<strong>'+day.charAt(0).toUpperCase()+day.slice(1)+'</strong> - '+subject+'<br><em>'+note+'</em>';
+          remindersList.appendChild(div);
+        }
+      }
+    });
+    if (!hasNotes){
+      remindersList.innerHTML = '<em>No reminders found.</em>';
+    }
+  }
+
+  function openRemindersModal(){
+    populateRemindersList();
+    if (!remindersModal) return;
+    remindersModal.classList.add('active');
+    remindersModal.setAttribute('aria-hidden','false');
+    minimized = false;
+  }
+
+  function closeRemindersModal(){
+    if (!remindersModal) return;
+    remindersModal.classList.remove('active');
+    remindersModal.setAttribute('aria-hidden','true');
+  }
+
+  function minimizeRemindersModal(){
+    minimized = true;
+    closeRemindersModal();
+  }
+
+  if (remindersBtn) remindersBtn.addEventListener('click', function(){
+    if (minimized){
+      openRemindersModal();
+    } else if (!remindersModal.classList.contains('active')) {
+      openRemindersModal();
+    } else {
+      closeRemindersModal();
+    }
+  });
+  if (remindersClose) remindersClose.addEventListener('click', closeRemindersModal);
+  if (remindersMinimize) remindersMinimize.addEventListener('click', minimizeRemindersModal);
+  if (remindersModal) remindersModal.addEventListener('click', e=>{ if(e.target===remindersModal) closeRemindersModal(); });
+
+  updateRemindersBadge();
+  setInterval(updateRemindersBadge, 1500);
+  window.updateRemindersBadge = updateRemindersBadge;
+})();
+}); 
+</script>
+
+
+<!-- Reminders Modal -->
+<div aria-hidden="true" aria-labelledby="reminders-modal-title" aria-modal="true" id="reminders-modal" role="dialog">
+  <div class="modal-content" tabindex="0">
+    <button aria-label="Close reminders modal" class="modal-close">×</button>
+    <h2 class="modal-header" id="reminders-modal-title">All Reminders</h2><button id="reminders-minimize" title="Minimize" style="position:absolute;top:16px;right:60px;background:none;border:none;font-size:22px;cursor:pointer;">_</button>
+    <div id="reminders-list" style="max-height:400px;overflow-y:auto;margin-bottom:10px;border:1px solid #ccc;padding:8px;border-radius:6px;">
+      <!-- Filled dynamically -->
+    </div>
+    
+  </div>
+</div>
+
+</body>
+</html>
