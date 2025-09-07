@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Understanding the Self — Flashcards</title>
+  <style>
+    :root{
+      --bg:#0f172a;         /* slate-900 */
+      --card:#111827;       /* gray-900 */
+      --text:#e5e7eb;       /* gray-200 */
+      --muted:#94a3b8;      /* slate-400 */
+      --accent:#22d3ee;     /* cyan-400 */
+      --ring:#38bdf8;       /* sky-400 */
+      --good:#10b981;       /* emerald-500 */
+      --warn:#f59e0b;       /* amber-500 */
+      --bad:#ef4444;        /* red-500 */
+      --shadow: 0 10px 25px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background:linear-gradient(180deg,#0b1224, var(--bg));
+      color:var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+      display:flex; flex-direction:column;
+    }
+    header{
+      position:sticky; top:0; backdrop-filter:saturate(140%) blur(6px);
+      background:rgba(8,12,24,.7); border-bottom:1px solid rgba(148,163,184,.15);
+      z-index:10;
+    }
+    .wrap{max-width:1200px; margin:0 auto; padding:14px 18px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between}
+    h1{font-size: clamp(18px, 2vw, 24px); margin:0; display:flex; align-items:center; gap:10px}
+    h1 .pill{font-size:12px; color:var(--bg); background:var(--accent); padding:2px 8px; border-radius:999px}
+    .actions{display:flex; gap:10px; flex-wrap:wrap}
+    button, .select{
+      appearance:none; border:1px solid rgba(148,163,184,.25); background:#0b1220; color:var(--text);
+      padding:10px 14px; border-radius:12px; cursor:pointer; box-shadow:var(--shadow);
+      transition:transform .05s ease, border-color .2s ease, background .2s ease;
+      font-weight:600;
+    }
+    button:hover{border-color:var(--ring)}
+    button:active{transform:translateY(1px) scale(.99)}
+    .select{display:flex; align-items:center; gap:8px}
+    .select select{
+      background:transparent; border:none; color:inherit; font:inherit; outline:none; cursor:pointer;
+    }
+    .counter{font-size:12px; color:var(--muted)}
+    main{flex:1; padding:22px 18px}
+    .grid{
+      --size: minmax(280px,1fr);
+      display:grid; gap:16px;
+      grid-template-columns: repeat(auto-fit, var(--size));
+      align-items:stretch;
+      max-width:1200px; margin:0 auto;
+    }
+    .card{
+      perspective:1200px; height:220px;
+    }
+    .inner{
+      position:relative; width:100%; height:100%; transform-style:preserve-3d;
+      transition: transform .7s cubic-bezier(.2,.7,.2,1);
+    }
+    .card.flipped .inner{ transform: rotateY(180deg) }
+    .face{
+      position:absolute; inset:0; padding:18px; border-radius:16px; border:1px solid rgba(148,163,184,.25);
+      background: radial-gradient(1200px 500px at 0% 0%, rgba(56,189,248,.08), transparent 40%) , var(--card);
+      box-shadow: var(--shadow);
+      display:flex; flex-direction:column; justify-content:center; align-items:flex-start; gap:12px;
+      backface-visibility:hidden;
+    }
+    .back{ transform: rotateY(180deg) }
+    .q{font-size:16px; font-weight:700; line-height:1.3}
+    .a{font-size:14px; line-height:1.45; color:#d1d5db}
+    .tag{
+      display:inline-flex; align-items:center; gap:6px; font-size:11px; color:#0b1220; background:var(--accent);
+      padding:4px 8px; border-radius:999px; font-weight:700; letter-spacing:.2px;
+    }
+    footer{max-width:1200px; margin:18px auto 40px; padding:0 18px; color:var(--muted); font-size:12px}
+    .kbd{border:1px solid rgba(148,163,184,.35); border-bottom-width:2px; padding:2px 6px; border-radius:6px; font-weight:700}
+    .controls{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+    .hidden{display:none !important}
+    .search{flex:1; min-width:240px; display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:12px; border:1px solid rgba(148,163,184,.25); background:#0b1220}
+    .search input{flex:1; background:transparent; border:none; color:var(--text); outline:none}
+    .small{font-size:12px; color:var(--muted)}
+    .toast{
+      position:fixed; bottom:16px; right:16px; background:#0b1220; border:1px solid rgba(148,163,184,.25);
+      color:var(--text); padding:10px 12px; border-radius:12px; box-shadow:var(--shadow); opacity:0; transform:translateY(8px);
+      transition:opacity .25s ease, transform .25s ease;
+    }
+    .toast.show{opacity:1; transform:none}
+    @media (max-width:480px){
+      .card{height:240px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Understanding the Self <span class="pill">Flashcards</span></h1>
+      <div class="actions">
+        <div class="search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="search" placeholder="Search cards…" />
+        </div>
+        <button id="shuffle">Shuffle</button>
+        <button id="reset">Reset Order</button>
+        <button id="showAnswers">Reveal All</button>
+        <span class="counter" id="counter">0 / 0</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid" id="grid" aria-live="polite"></div>
+  </main>
+
+  <footer>
+    <div class="controls">
+      <div><span class="kbd">Click</span> or <span class="kbd">Space</span> to flip a focused card. <span class="small">Tip: You can tab through cards.</span></div>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // Flashcards ONLY from the provided PDF notes
+    const rawCards = [
+      // Philosophical Perspectives
+      {tag:"Socrates", q:"Socrates — What is the self?", a:"First to systematically study the self. The soul is perfect and eternal; the body is imperfect and temporary. Motto: “The unexamined life is not worth living.”"},
+      {tag:"Plato", q:"Plato — What are the three parts of the soul?", a:"Rational, Spirited, and Appetitive parts. Justice arises when these parts are in harmony."},
+      {tag:"Plato", q:"Plato — Core idea of the self", a:"Builds on Socrates’ dualism; the well-ordered soul achieves justice through harmony of its parts."},
+      {tag:"Augustine", q:"Augustine of Hippo — How did he integrate Plato?", a:"Integrated Plato with Christianity. Body is mortal; the soul is immortal and seeks union with God."},
+      {tag:"Aquinas", q:"Thomas Aquinas — What composes a human person?", a:"Human = matter (body) + form (soul/essence). The soul (form) distinguishes humans from animals."},
+      {tag:"Descartes", q:"René Descartes — What is the foundation of certainty?", a:"Through methodic doubt he arrives at “Cogito, ergo sum” (I think, therefore I am). Dualism: mind (thinking) vs. body (machine)."},
+      {tag:"Hume", q:"David Hume — What is the self?", a:"An empiricist view: knowledge comes from sense experience. The self is a bundle of perceptions (impressions + ideas), not a permanent entity."},
+      {tag:"Kant", q:"Immanuel Kant — How does the mind relate to experience?", a:"The mind actively organizes experiences; the self is the organizing principle shaping impressions in time and space."},
+      {tag:"Ryle", q:"Gilbert Ryle — What is his stance on the self?", a:"Denies a non-physical inner self. The 'self' is just patterns of behavior — a critique of the 'ghost in the machine' idea."},
+      {tag:"Merleau-Ponty", q:"Maurice Merleau-Ponty — How are mind and body related?", a:"Mind and body are intertwined; the self is fundamentally an embodied experience."},
+
+      // Self, Society, and Culture
+      {tag:"Society & Culture", q:"How is the self shaped by society and culture?", a:"The self is shaped by society, culture, and institutions like the family."},
+      {tag:"Society & Culture", q:"What are the listed characteristics of the self?", a:"Separate, self-contained, independent, consistent, unitary, private."},
+      {tag:"Society & Culture", q:"Marcel Mauss — Moi vs. Personne?", a:"Moi = biological self. Personne = social self."},
+      {tag:"Society & Culture", q:"Give the example related to Filipinos and traffic rules.", a:"Filipinos often follow traffic rules abroad; culture shapes behavior."},
+      {tag:"Family", q:"What is the role of the family in shaping the self?", a:"Family is the primary institution shaping the self through learning, manners, and values."},
+
+      // Quick Review Checklist — turned into Q&A with direct answers from the notes
+      {tag:"Review", q:"Explain Socrates’ idea of the examined life.", a:"Life should be examined through reflection and pursuit of virtue — “The unexamined life is not worth living,” emphasizing care for the immortal soul over the temporary body."},
+      {tag:"Review", q:"State Plato’s three parts of the soul.", a:"Rational, Spirited, Appetitive — harmony among them yields justice."},
+      {tag:"Review", q:"Compare Augustine and Aquinas on the self.", a:"Augustine: body mortal; soul immortal and seeks God. Aquinas: human is matter (body) + form (soul/essence); the soul is the form distinguishing humans."},
+      {tag:"Review", q:"What is Descartes’ Cogito?", a:"“I think, therefore I am” — certainty of the thinking self distinguished from the mechanical body."},
+      {tag:"Review", q:"Summarize Hume’s bundle theory.", a:"No permanent self; only a bundle of perceptions (impressions + ideas) gathered by experience."},
+      {tag:"Review", q:"How did Kant differ from Hume on the self?", a:"Hume: self is just perceptions. Kant: the self actively organizes impressions — an organizing principle structuring experience in time and space."},
+      {tag:"Review", q:"What did Ryle say about the self?", a:"He denied a non-physical inner entity; the self is behavior — rejecting the 'ghost in the machine'."},
+      {tag:"Review", q:"What is Merleau-Ponty’s view of embodiment?", a:"Mind and body are intertwined; the self is fundamentally embodied."},
+      {tag:"Review", q:"How do society and culture shape the self?", a:"They provide norms, roles, and institutions (e.g., family) that shape behavior and identity."},
+      {tag:"Review", q:"What role does family play in identity formation?", a:"Primary institution teaching learning, manners, and values that shape the self."}
+    ];
+
+    // --- App State ---
+    let order = [...rawCards.keys()];
+    const originalOrder = [...order];
+    const grid = document.getElementById('grid');
+    const counter = document.getElementById('counter');
+    const search = document.getElementById('search');
+    const toast = document.getElementById('toast');
+    let revealAll = false;
+
+    function showToast(text){
+      toast.textContent = text;
+      toast.classList.add('show');
+      setTimeout(()=>toast.classList.remove('show'), 1200);
+    }
+
+    function updateCounter(){
+      const total = order.length;
+      const flipped = [...grid.querySelectorAll('.card.flipped')].length;
+      counter.textContent = flipped + " / " + total;
+    }
+
+    function render(){
+      grid.innerHTML = '';
+      for(const idx of order){
+        const card = rawCards[idx];
+        const cardEl = document.createElement('div');
+        cardEl.className = 'card';
+        cardEl.tabIndex = 0;
+        cardEl.innerHTML = `
+          <div class="inner">
+            <div class="face front">
+              <span class="tag">${card.tag}</span>
+              <div class="q">${card.q}</div>
+            </div>
+            <div class="face back">
+              <span class="tag">Answer</span>
+              <div class="a">${card.a}</div>
+            </div>
+          </div>
+        `;
+        cardEl.addEventListener('click', ()=>{
+          cardEl.classList.toggle('flipped');
+          updateCounter();
+        });
+        cardEl.addEventListener('keyup', (e)=>{
+          if(e.code==='Space' || e.key===' '){
+            cardEl.classList.toggle('flipped');
+            updateCounter();
+            e.preventDefault();
+          }
+        });
+        if(revealAll){ cardEl.classList.add('flipped'); }
+        grid.appendChild(cardEl);
+      }
+      updateCounter();
+    }
+
+    function shuffle(){
+      for(let i=order.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [order[i],order[j]]=[order[j],order[i]];
+      }
+      render();
+      showToast("Shuffled");
+    }
+
+    function resetOrder(){
+      order = [...originalOrder];
+      revealAll = false;
+      render();
+      showToast("Reset order");
+    }
+
+    function toggleRevealAll(){
+      revealAll = !revealAll;
+      for(const c of grid.children){ c.classList.toggle('flipped', revealAll); }
+      updateCounter();
+      showToast(revealAll? "Revealed all": "Concealed all");
+    }
+
+    function doSearch(term){
+      const t = term.trim().toLowerCase();
+      if(!t){
+        order = [...originalOrder];
+      }else{
+        order = originalOrder.filter(i => {
+          const c = rawCards[i];
+          return [c.tag, c.q, c.a].join(' ').toLowerCase().includes(t);
+        });
+      }
+      render();
+    }
+
+    document.getElementById('shuffle').addEventListener('click', shuffle);
+    document.getElementById('reset').addEventListener('click', resetOrder);
+    document.getElementById('showAnswers').addEventListener('click', toggleRevealAll);
+    search.addEventListener('input', e=> doSearch(e.target.value));
+
+    // initial render
+    render();
+  </script>
+</body>
+</html>
